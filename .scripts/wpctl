@@ -31,11 +31,12 @@ elif [[ "$1" == "start" ]]; then
 elif [[ "$1" == "populate" ]]; then
     shift 1
     ind=1
+    find "$WALLPAPER_DIR" -type l -delete
     wallpapers_o="$(find $@ -maxdepth 1 -type f | sort -R)"
     wallpapers=$wallpapers_o
     while [[ $ind -le 10 ]]; do
 	    if [[ "$wallpapers" == "" ]]; then
-		wallpapers=$wallpapers_o
+		    wallpapers=$wallpapers_o
 	    fi
 	    img=$(head -n1 <<< "$wallpapers")
 	    wallpapers=$(echo "$wallpapers" | sed "1 d")

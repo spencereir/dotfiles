@@ -41,3 +41,7 @@ parse_git_branch() {
 
 PS1="%n\$(get_hostname) %~ $ "
 RPS1="%F{\$(branch_colour)}\$(parse_git_branch)%f\$(num_upstream)"
+
+PATH="$HOME/.scripts/":$PATH
+
+source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh

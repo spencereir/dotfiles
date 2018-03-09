@@ -2,5 +2,5 @@
 
 for f in $(git ls-tree -r master --name-only)
 do
-    echo $f
+    [[ -f "$HOME/$f" ]] && cp "$HOME/$f" "$f"
 done
