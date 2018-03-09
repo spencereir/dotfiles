@@ -1,0 +1,47 @@
+#!/usr/bin/zsh
+
+LOCK_DIR="/tmp"
+LOCKFILE="$LOCK_DIR/wpctl_lock"
+WALLPAPER_DIR="$HOME/.wallpapers"
+[[ -d "$LOCK_DIR" ]] || mkdir "$LOCK_DIR"
+[[ -d "$WALLPAPER_DIR" ]] || mkdir "$WALLPAPER_DIR"
+
+if ! [[ "$1" =~ "stop|start|populate" ]]; then
+    echo "Usage: `basename $0` (start|stop|populate) [DIRECTORY ...]"
+fi
+
+
+if [[ "$1" == "stop" ]]; then
+    [[ -f $LOCKFILE ]] || echo "Service is not active. Start it with '`basename $0` start'"
+    if [[ -f $LOCKFILE ]]; then
+        kill -9 $(cat $LOCKFILE)
+	rm $LOCKFILE
+    fi
+elif [[ "$1" == "start" ]]; then
+    if [[ -f $LOCKFILE ]]; then
+	echo "Error: Service is already running. Stop it first with `basename $0` stop"
+	return
+    fi
+    echo "$$" > $LOCKFILE
+
+    xprop -spy -root _NET_CURRENT_DESKTOP | while read -r event; do
+        num=$(i3-msg -t get_workspaces | jq '.[] | select(.focused==true) | .num')
+        feh --bg-fill "$WALLPAPER_DIR/$num"
+    done
+elif [[ "$1" == "populate" ]]; then
+    shift 1
+    ind=1
+    wallpapers_o="$(find $@ -maxdepth 1 -type f | sort -R)"
+    wallpapers=$wallpapers_o
+    while [[ $ind -le 10 ]]; do
+	    if [[ "$wallpapers" == "" ]]; then
+		wallpapers=$wallpapers_o
+	    fi
+	    img=$(head -n1 <<< "$wallpapers")
+	    wallpapers=$(echo "$wallpapers" | sed "1 d")
+	    [[ -f "$WALLPAPER_DIR/$ind" ]] && rm "$WALLPAPER_DIR/$ind"
+	    ln -s "$img" "$WALLPAPER_DIR/$ind"
+	    ind=$((ind + 1))
+    done
+    [[ -f $LOCKFILE ]] && i3 restart
+fi

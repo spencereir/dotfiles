@@ -1,0 +1,6 @@
+#!/usr/bin/zsh
+
+for f in $(git ls-tree -r master --name-only)
+do
+    echo $f
+done
